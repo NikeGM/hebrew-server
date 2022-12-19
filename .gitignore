@@ -1,0 +1,14 @@
+result.zip
+result
+node_modules
+.idea
+package-lock.json
+test
+dist
+images
+processed.json
+.env
+procfile.json
+src/lib/noft-game
+public/avatars
+log
