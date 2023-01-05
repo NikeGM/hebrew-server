@@ -116,7 +116,9 @@ export class WordsRepository {
         'comment',
         'isPairing',
         'isInfinitive',
-        'formId'
+        'formId',
+        'binyan',
+        'group'
       )
       .from(`${this.tables.WORDS} as w`)
       .leftJoin(`${this.tables.STATS} as s`, 'w.wordId', 's.wordId')
@@ -135,13 +137,13 @@ export class WordsRepository {
     for (let wordContainer of words) {
       const {
         wordId, word, translation, number, root, formIndex, comment, class: wordClass, pronunciation,
-        face, isPairing, gender, tense, isInfinitive
+        face, isPairing, gender, tense, isInfinitive, binyan, group
       } = wordContainer;
       console.log(wordContainer);
       wordsWithForms.push({
         forms: (await this.getWordsWithForms({ wordId: wordContainer.wordId, withForms: true })).slice(1),
         wordId, word, translation, number, root, formIndex, comment, pronunciation, face, isPairing, gender,
-        tense, isInfinitive,
+        tense, isInfinitive, binyan, group,
         class: wordClass
       });
     }

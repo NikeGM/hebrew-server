@@ -60,10 +60,30 @@ export interface Word {
   gender?: WordGender;
   face?: WordFace;
   tense?: WordTense;
+  binyan?: WordBinyan;
+  group?: WordGroup;
   stats?: WordStats;
   isInfinitive?: boolean;
   isPairing?: boolean;
   forms? : Word[]
+}
+
+export enum WordBinyan {
+  PAAL = 'paal',
+  PIEL = 'piel',
+  HIFIL = 'hifil',
+  HITPAEL = 'hitpael',
+}
+
+export enum WordGroup {
+  PAAL_SIMPLE = 'paal-simple',
+  PAAL_OT = 'paal-ot',
+  PAAL_2_LETTERS = 'paal-2-letters',
+  PIEL_EAE = 'piel-eae',
+  PIEL_EAOT = 'piel-eaot',
+  PIEL_4_LETTERS = 'piel-4-letters',
+  HIFIL_SIMPLE = 'hifil-simple',
+  HITPAEL_SIMPLE = 'hitpael-simple',
 }
 
 export enum Mode {
