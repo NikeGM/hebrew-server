@@ -63,4 +63,10 @@ export interface Word {
   stats?: WordStats;
   isInfinitive?: boolean;
   isPairing?: boolean;
+  forms? : Word[]
+}
+
+export enum Mode {
+  WORD,
+  TRANSLATION
 }

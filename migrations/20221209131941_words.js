@@ -14,7 +14,11 @@ exports.up = async (knex) => {
     table.string('comment'); // Коментарий
     table.boolean('isPairing').defaultTo(false); // Сопряжение
     table.boolean('isInfinitive').defaultTo(false); // Инфинитив
+    table.integer('formId');
+    table.string('binyan');
+    table.string('group');
 
+    table.unique(['word', 'translation', 'pronunciation']);
     table.index('wordId');
   });
   await knex.schema.createTable('stats', (table) => {

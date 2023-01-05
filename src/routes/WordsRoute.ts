@@ -2,7 +2,7 @@ import { IRoute, Router } from 'express';
 import { Order } from '../types/common';
 import { WordsRepository } from '../repositories/WordsRepository';
 import { asyncMiddleware } from '../utils/async-middleware';
-import { Word } from '../types';
+import { Mode, Word, WordClass } from '../types';
 
 const defaultSearch = {
   limit: 500,
@@ -22,10 +22,21 @@ export interface EditWordsFilters {
   limit: number;
 }
 
+export interface CardsFilters {
+  count: number;
+  classes: WordClass[];
+  mode: Mode;
+}
 
 export interface GetWordData {
   wordId: number;
   withForms: boolean;
+}
+
+export interface StatsType {
+  wordId: number;
+  isCorrect: boolean;
+  mode: Mode;
 }
 
 export class WordsRoute implements IRoute {
@@ -39,11 +50,15 @@ export class WordsRoute implements IRoute {
     this.saveWordsRoute();
     this.updateWordsRoute();
     this.getWordRoute();
+    this.getWordsForCardsRoute();
+    this.saveStats();
 
     this.getWordController = this.getWordController.bind(this);
     this.getEditWordsController = this.getEditWordsController.bind(this);
     this.saveWordsController = this.saveWordsController.bind(this);
     this.updateWordsController = this.updateWordsController.bind(this);
+    this.getWordsForCardsController = this.getWordsForCardsController.bind(this);
+    this.saveStatsController = this.saveStatsController.bind(this);
   }
 
   public saveWordsRoute() {
@@ -51,8 +66,24 @@ export class WordsRoute implements IRoute {
       '/edit/save',
       asyncMiddleware(async (req, res) => {
         try {
-          console.log(req.body)
+          console.log(req.body);
           const result = await this.saveWordsController(req.body);
+          return res.status(200).json(result);
+        } catch (e) {
+          console.error(`Save route error ${JSON.stringify(e.stack)}`);
+          res.sendStatus(500);
+        }
+      })
+    );
+  }
+
+
+  public saveStats() {
+    this.route.post(
+      '/cards/save-stats',
+      asyncMiddleware(async (req, res) => {
+        try {
+          const result = await this.saveStatsController(req.body);
           return res.status(200).json(result);
         } catch (e) {
           console.error(`Save route error ${JSON.stringify(e.stack)}`);
@@ -92,13 +123,28 @@ export class WordsRoute implements IRoute {
     );
   }
 
+  public getWordsForCardsRoute() {
+    this.route.post(
+      '/cards/search',
+      asyncMiddleware(async (req, res) => {
+        try {
+          const result = await this.getWordsForCardsController({ ...defaultSearch, ...req.body });
+          return res.status(200).json(result);
+        } catch (e) {
+          console.error(`Search route error ${JSON.stringify(e.stack)}`);
+          res.sendStatus(500);
+        }
+      })
+    );
+  }
+
   public getWordRoute() {
     this.route.post(
       '/edit/get-word',
       asyncMiddleware(async (req, res) => {
         try {
           const result = await this.getWordController(req.body);
-          console.log(req.body, result)
+          console.log(req.body, result);
           return res.status(200).json(result);
         } catch (e) {
           console.error(`get word route error ${JSON.stringify(e.stack)}`);
@@ -106,6 +152,15 @@ export class WordsRoute implements IRoute {
         }
       })
     );
+  }
+
+  public async getWordsForCardsController(filters: CardsFilters): Promise<any> {
+    try {
+      return this.wordsRepository.getWordsForCards(filters);
+    } catch (e) {
+      console.error(`Words controller error ${JSON.stringify(e.stack)}`);
+      return null;
+    }
   }
 
   public async getWordController(data: GetWordData): Promise<any> {
@@ -129,6 +184,15 @@ export class WordsRoute implements IRoute {
   public async saveWordsController(words: Word[]): Promise<any> {
     try {
       return this.wordsRepository.saveWords(words);
+    } catch (e) {
+      console.error(`Save words controller error ${JSON.stringify(e.stack)}`);
+      return null;
+    }
+  }
+
+  public async saveStatsController(data: StatsType): Promise<any> {
+    try {
+      return this.wordsRepository.saveStats(data);
     } catch (e) {
       console.error(`Save words controller error ${JSON.stringify(e.stack)}`);
       return null;
