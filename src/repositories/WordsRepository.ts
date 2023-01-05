@@ -24,41 +24,33 @@ export class WordsRepository {
 
   }
 
-  public async saveStats(data: StatsType) {
+  public async saveStats(data: StatsType, personId = 1) {
     const { wordId, isCorrect, mode } = data;
     const query = this.client.table(this.tables.STATS);
-    let updatedData;
 
-    if (mode === Mode.WORD && isCorrect) (
-      updatedData = {
-        plusesFront: this.client.raw(`\"plusesFront\" + 1`)
+    const dbStatsRows = await this.client.table(this.tables.STATS).select().where({ wordId });
+    const dbStats = dbStatsRows[0];
+    console.log(data);
+    if (dbStats) {
+      query.update({
+        personId,
+        plusesFront: (mode === Mode.WORD && isCorrect) ? dbStats.plusesFront + 1 : dbStats.plusesFront,
+        minusesFront: (mode === Mode.WORD && !isCorrect) ? dbStats.minusesFront + 1 : dbStats.minusesFront,
+        plusesBack: (mode === Mode.TRANSLATION && isCorrect) ? dbStats.plusesBack + 1 : dbStats.plusesBack,
+        minusesBack: (mode === Mode.TRANSLATION && !isCorrect) ? dbStats.minusesBack + 1 : dbStats.minusesBack
+      })
+        .where({ wordId });
+    } else {
+      query.insert({
+        personId,
+        wordId,
+        plusesFront: +(mode === Mode.WORD && isCorrect),
+        minusesFront: +(mode === Mode.WORD && !isCorrect),
+        plusesBack: +(mode === Mode.TRANSLATION && isCorrect),
+        minusesBack: +(mode === Mode.TRANSLATION && !isCorrect)
       });
-
-    if (mode === Mode.WORD && !isCorrect) (
-      updatedData = {
-        minusesFront: this.client.raw(`\"minusesFront\" + 1`)
-      });
-
-    if (mode === Mode.TRANSLATION && isCorrect) (
-      updatedData = {
-        plusesBack: this.client.raw(`\"plusesBack\" + 1`)
-      });
-
-    if (mode === Mode.TRANSLATION && !isCorrect) (
-      updatedData = {
-        minusesBack: this.client.raw(`\"minusesBack\" + 1`)
-      });
-
-    query.update(updatedData);
-
-    query.where({ wordId });
-
-    const ids = await this.executeQuery<number>(query, 'save words');
-
-    return this.client.table(this.tables.WORDS).update({
-      formId: ids[0]
-    }).whereIn('wordId', ids);
-
+    }
+    return this.executeQuery<number>(query, 'save words');
   }
 
 
