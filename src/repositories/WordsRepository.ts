@@ -30,7 +30,7 @@ export class WordsRepository {
 
     const dbStatsRows = await this.client.table(this.tables.STATS).select().where({ wordId });
     const dbStats = dbStatsRows[0];
-    console.log(data);
+
     if (dbStats) {
       query.update({
         personId,
@@ -110,7 +110,9 @@ export class WordsRepository {
         'isInfinitive',
         'formId',
         'binyan',
-        'group'
+        'group',
+        this.client.raw(`s."plusesFront" - s."minusesFront" as difFront`),
+        this.client.raw(`s."plusesBack" - s."minusesBack" as difBack`)
       )
       .from(`${this.tables.WORDS} as w`)
       .leftJoin(`${this.tables.STATS} as s`, 'w.wordId', 's.wordId')
@@ -118,8 +120,8 @@ export class WordsRepository {
       .andWhere({ formIndex: 0 })
       .limit(count * 2);
 
-    if (mode === Mode.WORD) query.orderBy('s.plusesFront', 'asc');
-    if (mode === Mode.TRANSLATION) query.orderBy('s.plusesBack', 'asc');
+    if (mode === Mode.WORD) query.orderByRaw(`difFront asc`);
+    if (mode === Mode.TRANSLATION) query.orderByRaw(`difBack asc`);
 
     const result: Word[] = await this.executeQuery(query, 'get words for cards');
     const words = shuffle<Word>(result).slice(0, count);

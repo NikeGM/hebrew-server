@@ -73,6 +73,7 @@ export enum WordBinyan {
   PIEL = 'piel',
   HIFIL = 'hifil',
   HITPAEL = 'hitpael',
+  NIFAL = 'NIFAL'
 }
 
 export enum WordGroup {
@@ -84,6 +85,7 @@ export enum WordGroup {
   PIEL_4_LETTERS = 'piel-4-letters',
   HIFIL_SIMPLE = 'hifil-simple',
   HITPAEL_SIMPLE = 'hitpael-simple',
+  NIFAL_SIMPLE = 'nifal-simple',
 }
 
 export enum Mode {
