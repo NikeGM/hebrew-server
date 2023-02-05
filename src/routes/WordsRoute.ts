@@ -52,6 +52,7 @@ export class WordsRoute implements IRoute {
     this.getWordRoute();
     this.getWordsForCardsRoute();
     this.saveStats();
+    this.getFormsRoute();
 
     this.getWordController = this.getWordController.bind(this);
     this.getEditWordsController = this.getEditWordsController.bind(this);
@@ -59,6 +60,7 @@ export class WordsRoute implements IRoute {
     this.updateWordsController = this.updateWordsController.bind(this);
     this.getWordsForCardsController = this.getWordsForCardsController.bind(this);
     this.saveStatsController = this.saveStatsController.bind(this);
+    this.saveFormsController = this.saveFormsController.bind(this);
   }
 
   public saveWordsRoute() {
@@ -154,6 +156,23 @@ export class WordsRoute implements IRoute {
     );
   }
 
+
+  public getFormsRoute() {
+    this.route.post(
+      '/edit/save-forms',
+      asyncMiddleware(async (req, res) => {
+        try {
+          const result = await this.saveFormsController(req.body);
+          console.log(req.body, result);
+          return res.status(200).json(result);
+        } catch (e) {
+          console.error(`save forms route error ${JSON.stringify(e.stack)}`);
+          res.sendStatus(500);
+        }
+      })
+    );
+  }
+
   public async getWordsForCardsController(filters: CardsFilters): Promise<any> {
     try {
       return this.wordsRepository.getWordsForCards(filters);
@@ -186,6 +205,15 @@ export class WordsRoute implements IRoute {
       return this.wordsRepository.saveWords(words);
     } catch (e) {
       console.error(`Save words controller error ${JSON.stringify(e.stack)}`);
+      return null;
+    }
+  }
+
+  public async saveFormsController(words: Word[]): Promise<any> {
+    try {
+      return this.wordsRepository.saveForms(words);
+    } catch (e) {
+      console.error(`Save forms controller error ${JSON.stringify(e.stack)}`);
       return null;
     }
   }

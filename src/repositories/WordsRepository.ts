@@ -21,7 +21,10 @@ export class WordsRepository {
     return this.client.table(this.tables.WORDS).update({
       formId: ids[0]
     }).whereIn('wordId', ids);
+  }
 
+  public async saveForms(words: Word[]) {
+    return this.client.table(this.tables.WORDS).insert(words).returning('wordId');
   }
 
   public async saveStats(data: StatsType, personId = 1) {
@@ -52,7 +55,6 @@ export class WordsRepository {
     }
     return this.executeQuery<number>(query, 'save words');
   }
-
 
   public async getWords(filters: EditWordsFilters) {
     const { limit, language, like } = filters;
