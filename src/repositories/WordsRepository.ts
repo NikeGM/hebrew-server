@@ -2,6 +2,8 @@ import { tryCatchWrapperAsync } from '../utils/wrapper';
 import { Mode, Word } from '../types';
 import { CardsFilters, EditWordsFilters, GetWordData, Language, StatsType } from '../routes/WordsRoute';
 import { shuffle } from '../utils/utils';
+import { addWhereInArrayFilter } from '../utils/query-builder';
+import { PostgresArrayOperators } from '../types/common';
 
 export class WordsRepository {
   private readonly tables = {
@@ -92,7 +94,7 @@ export class WordsRepository {
   }
 
   public async getWordsForCards(data: CardsFilters) {
-    const { count, classes, mode } = data;
+    const { count, classes, mode, tags } = data;
     console.log(data);
     const query = this.client
       .select(
@@ -113,6 +115,7 @@ export class WordsRepository {
         'formId',
         'binyan',
         'group',
+        'tags',
         this.client.raw(`s."plusesFront" - s."minusesFront" as difFront`),
         this.client.raw(`s."plusesBack" - s."minusesBack" as difBack`)
       )
@@ -121,6 +124,8 @@ export class WordsRepository {
       .whereIn('class', classes)
       .andWhere({ formIndex: 0 })
       .limit(count * 2);
+
+    addWhereInArrayFilter(query, 'tags', tags, PostgresArrayOperators.InOr);
 
     if (mode === Mode.WORD) query.orderByRaw(`difFront asc`);
     if (mode === Mode.TRANSLATION) query.orderByRaw(`difBack asc`);
@@ -133,13 +138,13 @@ export class WordsRepository {
     for (let wordContainer of words) {
       const {
         wordId, word, translation, number, root, formIndex, comment, class: wordClass, pronunciation,
-        face, isPairing, gender, tense, isInfinitive, binyan, group
+        face, isPairing, gender, tense, isInfinitive, binyan, group, tags
       } = wordContainer;
       console.log(wordContainer);
       wordsWithForms.push({
         forms: (await this.getWordsWithForms({ wordId: wordContainer.wordId, withForms: true })).slice(1),
         wordId, word, translation, number, root, formIndex, comment, pronunciation, face, isPairing, gender,
-        tense, isInfinitive, binyan, group,
+        tense, isInfinitive, binyan, group, tags,
         class: wordClass
       });
     }

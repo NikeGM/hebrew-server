@@ -65,7 +65,8 @@ export interface Word {
   stats?: WordStats;
   isInfinitive?: boolean;
   isPairing?: boolean;
-  forms? : Word[]
+  forms?: Word[];
+  tags?: string[];
 }
 
 export enum WordBinyan {

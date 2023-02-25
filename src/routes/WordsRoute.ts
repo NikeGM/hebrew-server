@@ -26,6 +26,7 @@ export interface CardsFilters {
   count: number;
   classes: WordClass[];
   mode: Mode;
+  tags: string[];
 }
 
 export interface GetWordData {
